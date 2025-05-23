@@ -36,9 +36,6 @@ namespace UnityEssentials
         /// <remarks>This method provides a custom inspector interface for enum fields marked with a
         /// specific attribute, allowing users to toggle individual flags or select "All" or "None" options. If the
         /// property is not an enum, an error message is displayed instead.</remarks>
-        /// <param name="position">The rectangle on the screen to use for the property GUI.</param>
-        /// <param name="property">The serialized property being drawn. Must be of type <see cref="SerializedPropertyType.Enum"/>.</param>
-        /// <param name="label">The label to display alongside the property field.</param>
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             if (property.propertyType != SerializedPropertyType.Enum)
