@@ -20,13 +20,6 @@ namespace UnityEssentials
         private Array _enumValues;
         private Type _enumUnderlyingType;
 
-        /// <summary>
-        /// Calculates the height of the property field in the editor, accounting for foldout state and the number of
-        /// enum values.
-        /// </summary>
-        /// <param name="property">The serialized property being drawn in the editor.</param>
-        /// <param name="label">The label to display alongside the property field.</param>
-        /// <returns>The height, in pixels, required to render the property field.</returns>
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label) =>
             EditorGUIUtility.singleLineHeight * (_foldoutOpen ? Enum.GetValues(fieldInfo.FieldType).Length + 2 : 1);
 
@@ -83,14 +76,6 @@ namespace UnityEssentials
             property.serializedObject.ApplyModifiedProperties();
         }
 
-        /// <summary>
-        /// Retrieves the value of an enumeration at the specified index.
-        /// </summary>
-        /// <remarks>This method assumes that the enumeration values are stored in a collection and that
-        /// the underlying type of the enumeration is known. The returned value is converted to the enumeration's
-        /// underlying type.</remarks>
-        /// <param name="index">The zero-based index of the enumeration value to retrieve.</param>
-        /// <returns>The enumeration value at the specified index, converted to its underlying type.</returns>
         private object GetEnumValue(int index) =>
             Convert.ChangeType(_enumValues.GetValue(index), _enumUnderlyingType);
 
@@ -171,15 +156,6 @@ namespace UnityEssentials
             return !value.Equals(Convert.ChangeType(0, _enumUnderlyingType));
         }
 
-        /// <summary>
-        /// Performs a bitwise OR operation on two objects of the specified type.
-        /// </summary>
-        /// <param name="a">The first operand. Must be of the specified <paramref name="type"/>.</param>
-        /// <param name="b">The second operand. Must be of the specified <paramref name="type"/>.</param>
-        /// <param name="type">The type of the operands. Must be a supported integral type (e.g., <see cref="int"/>, <see cref="uint"/>,
-        /// <see cref="short"/>, etc.).</param>
-        /// <returns>The result of the bitwise OR operation, cast to the specified <paramref name="type"/>.</returns>
-        /// <exception cref="ArgumentException">Thrown if <paramref name="type"/> is not a supported integral type.</exception>
         private static object DoOrOperator(object a, object b, Type type)
         {
             return type switch
@@ -196,16 +172,6 @@ namespace UnityEssentials
             };
         }
 
-        /// <summary>
-        /// Performs a bitwise AND operation on two objects of the specified type.
-        /// </summary>
-        /// <param name="a">The first operand. Must be an object of the specified <paramref name="type"/>.</param>
-        /// <param name="b">The second operand. Must be an object of the specified <paramref name="type"/>.</param>
-        /// <param name="type">The type of the operands. Supported types include <see cref="int"/>, <see cref="uint"/>, <see
-        /// cref="short"/>, <see cref="ushort"/>, <see cref="long"/>, <see cref="ulong"/>, <see cref="byte"/>, and <see
-        /// cref="sbyte"/>.</param>
-        /// <returns>The result of the bitwise AND operation, cast to an object of the specified <paramref name="type"/>.</returns>
-        /// <exception cref="ArgumentException">Thrown if <paramref name="type"/> is not one of the supported types.</exception>
         private static object DoAndOperator(object a, object b, Type type)
         {
             return type switch
@@ -222,18 +188,6 @@ namespace UnityEssentials
             };
         }
 
-        /// <summary>
-        /// Performs a bitwise NOT operation on the specified value, based on its type.
-        /// </summary>
-        /// <remarks>Supported types for the <paramref name="type"/> parameter include: <see cref="int"/>,
-        /// <see cref="uint"/>, <see cref="short"/>, <see cref="ushort"/>, <see cref="long"/>, <see cref="ulong"/>, <see
-        /// cref="byte"/>, and <see cref="sbyte"/>.</remarks>
-        /// <param name="a">The value to apply the bitwise NOT operation to. The type of this value must match the specified <paramref
-        /// name="type"/>.</param>
-        /// <param name="type">The type of the value <paramref name="a"/>. Must be a supported integral type (e.g., <see cref="int"/>, <see
-        /// cref="uint"/>, <see cref="short"/>, etc.).</param>
-        /// <returns>The result of the bitwise NOT operation, cast to the specified type.</returns>
-        /// <exception cref="ArgumentException">Thrown if <paramref name="type"/> is not a supported integral type.</exception>
         private static object DoNotOperator(object a, Type type)
         {
             return type switch
