@@ -16,19 +16,13 @@ namespace UnityEssentials
     {
         private bool _foldoutOpen = false;
 
-        private object _theEnum;
+        private object _enumObject;
         private Array _enumValues;
         private Type _enumUnderlyingType;
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label) =>
             EditorGUIUtility.singleLineHeight * (_foldoutOpen ? Enum.GetValues(fieldInfo.FieldType).Length + 2 : 1);
 
-        /// <summary>
-        /// Renders a custom GUI for an enum property with support for flag-based selection.
-        /// </summary>
-        /// <remarks>This method provides a custom inspector interface for enum fields marked with a
-        /// specific attribute, allowing users to toggle individual flags or select "All" or "None" options. If the
-        /// property is not an enum, an error message is displayed instead.</remarks>
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             if (property.propertyType != SerializedPropertyType.Enum)
@@ -37,14 +31,14 @@ namespace UnityEssentials
                 return;
             }
 
-            _theEnum = fieldInfo.GetValue(property.serializedObject.targetObject);
-            _enumValues = Enum.GetValues(_theEnum.GetType());
-            _enumUnderlyingType = Enum.GetUnderlyingType(_theEnum.GetType());
+            _enumObject = fieldInfo.GetValue(property.serializedObject.targetObject);
+            _enumValues = Enum.GetValues(_enumObject.GetType());
+            _enumUnderlyingType = Enum.GetUnderlyingType(_enumObject.GetType());
 
             //We need to convert the enum to its underlying type, if we don't it will be boxed
             //into an object later and then we would need to unbox it like (UnderlyingType)(EnumType)theEnum.
             //If we do this here we can just do (UnderlyingType)theEnum later (plus we can visualize the value of theEnum in VS when debugging)
-            _theEnum = Convert.ChangeType(_theEnum, _enumUnderlyingType);
+            _enumObject = Convert.ChangeType(_enumObject, _enumUnderlyingType);
 
             EditorGUI.BeginProperty(position, label, property);
 
@@ -57,11 +51,11 @@ namespace UnityEssentials
                 {
                     //Draw the All button
                     if (GUI.Button(new Rect(position.x, position.y + EditorGUIUtility.singleLineHeight * 1, 30, 15), "All"))
-                        _theEnum = DoNotOperator(Convert.ChangeType(0, _enumUnderlyingType), _enumUnderlyingType);
+                        _enumObject = DoNotOperator(Convert.ChangeType(0, _enumUnderlyingType), _enumUnderlyingType);
 
                     //Draw the None button
                     if (GUI.Button(new Rect(position.x + 32, position.y + EditorGUIUtility.singleLineHeight * 1, 40, 15), "None"))
-                        _theEnum = Convert.ChangeType(0, _enumUnderlyingType);
+                        _enumObject = Convert.ChangeType(0, _enumUnderlyingType);
 
                     //Draw the list
                     for (int i = 0; i < Enum.GetNames(fieldInfo.FieldType).Length; i++)
@@ -72,7 +66,7 @@ namespace UnityEssentials
                 EditorGUI.indentLevel--;
             }
 
-            fieldInfo.SetValue(property.serializedObject.targetObject, _theEnum);
+            fieldInfo.SetValue(property.serializedObject.targetObject, _enumObject);
             property.serializedObject.ApplyModifiedProperties();
         }
 
@@ -94,10 +88,10 @@ namespace UnityEssentials
             if (set)
             {
                 if (IsNoneElement(index))
-                    _theEnum = Convert.ChangeType(0, _enumUnderlyingType);
+                    _enumObject = Convert.ChangeType(0, _enumUnderlyingType);
 
                 //enum = enum | value
-                _theEnum = DoOrOperator(_theEnum, GetEnumValue(index), _enumUnderlyingType);
+                _enumObject = DoOrOperator(_enumObject, GetEnumValue(index), _enumUnderlyingType);
             }
             else
             {
@@ -108,7 +102,7 @@ namespace UnityEssentials
                 object notValue = DoNotOperator(value, _enumUnderlyingType);
 
                 //enum = enum & ~value
-                _theEnum = DoAndOperator(_theEnum, notValue, _enumUnderlyingType);
+                _enumObject = DoAndOperator(_enumObject, notValue, _enumUnderlyingType);
             }
 
         }
@@ -125,7 +119,7 @@ namespace UnityEssentials
         /// <returns><see langword="true"/> if the specified enum element is set; otherwise, <see langword="false"/>.</returns>
         private bool IsSet(int index)
         {
-            object value = DoAndOperator(_theEnum, GetEnumValue(index), _enumUnderlyingType);
+            object value = DoAndOperator(_enumObject, GetEnumValue(index), _enumUnderlyingType);
 
             //We handle All and None elements differently, since they're "special"
             if (IsAllElement(index))
@@ -135,23 +129,23 @@ namespace UnityEssentials
                 //e.g. An enum with 6 elements including the "All" element. If we set all bits visible except the "All" bit,
                 //two bits might be unset. Since we want the "All" element checkbox to be checked when all other elements are set
                 //we have to make sure those two extra bits are also set.
-                bool allSet = true;
+                bool allBitsSet = true;
                 for (int i = 0; i < Enum.GetNames(fieldInfo.FieldType).Length; i++)
                     if (i != index && !IsNoneElement(i) && !IsSet(i))
                     {
-                        allSet = false;
+                        allBitsSet = false;
                         break;
                     }
 
                 //Make sure all bits are set if all "visible bits" are set
-                if (allSet)
-                    _theEnum = DoNotOperator(Convert.ChangeType(0, _enumUnderlyingType), _enumUnderlyingType);
+                if (allBitsSet)
+                    _enumObject = DoNotOperator(Convert.ChangeType(0, _enumUnderlyingType), _enumUnderlyingType);
 
-                return allSet;
+                return allBitsSet;
             }
             else if (IsNoneElement(index))
                 //Just check the "None" element checkbox our enum's value is 0
-                return Convert.ChangeType(_theEnum, _enumUnderlyingType).Equals(Convert.ChangeType(0, _enumUnderlyingType));
+                return Convert.ChangeType(_enumObject, _enumUnderlyingType).Equals(Convert.ChangeType(0, _enumUnderlyingType));
 
             return !value.Equals(Convert.ChangeType(0, _enumUnderlyingType));
         }
@@ -209,8 +203,8 @@ namespace UnityEssentials
 
         private bool IsAllElement(int index)
         {
-            object elemValue = GetEnumValue(index);
-            return elemValue.Equals(DoNotOperator(Convert.ChangeType(0, _enumUnderlyingType), _enumUnderlyingType));
+            object elementValue = GetEnumValue(index);
+            return elementValue.Equals(DoNotOperator(Convert.ChangeType(0, _enumUnderlyingType), _enumUnderlyingType));
         }
     }
 }
