@@ -1,9 +1,7 @@
 {
-    "name": "UnityEssentials.EnumFlagsDrawer.Editor",
+    "name": "UnityEssentials.UnityEssentials.Editor.Drawer.EnumFlags",
     "rootNamespace": "UnityEssentials",
-    "references": [
-        "GUID:a64f46b0af625cf44a43eacc887b34f8"
-    ],
+    "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
