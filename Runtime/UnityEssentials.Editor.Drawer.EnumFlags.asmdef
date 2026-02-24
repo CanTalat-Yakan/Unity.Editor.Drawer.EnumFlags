@@ -1,5 +1,5 @@
 {
-    "name": "UnityEssentials.UnityEssentials.Editor.Drawer.EnumFlags",
+    "name": "UnityEssentials.Editor.Drawer.EnumFlags",
     "rootNamespace": "UnityEssentials",
     "references": [],
     "includePlatforms": [],
